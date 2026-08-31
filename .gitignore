@@ -4,6 +4,7 @@
 /CMakeFiles/
 /Makefile
 /cmake_install.cmake
+out/
 
 # Ignorar arquivos de saída do compilador (objetos e executáveis)
 *.o
@@ -22,7 +23,8 @@ glfw-src/
 glfw-build/
 external/
 
-# Ignorar configurações específicas do VSCode
+# Ignorar configurações específicas do VSCode e do VisualStudio
+.vs/
 .vscode/
 CMakeUserPresets.json
 
