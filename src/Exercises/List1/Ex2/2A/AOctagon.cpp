@@ -8,7 +8,7 @@ using namespace std;
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 
 int setupShader();
-int setupGeometryDots();
+int setupGeometryOctagon();
 
 const GLuint WIDTH = 800, HEIGHT = 600;
 
@@ -62,7 +62,7 @@ int main()
 
 	GLuint shaderID = setupShader();
 
-	GLuint VAO1 = setupGeometryDots();
+	GLuint VAO1 = setupGeometryOctagon();
 
 	GLint colorLoc = glGetUniformLocation(shaderID, "inputColor");
 
@@ -101,7 +101,7 @@ int main()
 
 		glBindVertexArray(VAO1);
 		glUniform4f(colorLoc, 0.0f, 0.0f, 0.0f, 1.0f);
-		glDrawArrays(GL_POINTS, 0, 5);
+		glDrawArrays(GL_TRIANGLES, 0, 24);
 
 		glfwSwapBuffers(window);
 	}
@@ -160,18 +160,40 @@ int setupShader()
 	return shaderProgram;
 }
 
-int setupGeometryDots()
+int setupGeometryOctagon()
 {
 	GLfloat vertices[] = {
-		-0.5, -0.5, 0.0,     
+        -0.6, -0.2, 0.0,
+        -0.6,  0.2, 0.0,
+        0.0,  0.0, 0.0,
 
-        -0.5,  0.5, 0.0,
+        -0.6,  0.2, 0.0,
+        -0.2,  0.6, 0.0,
+        0.0,  0.0, 0.0,
 
-         0.0,  0.0, 0.0,
+        -0.2,  0.6, 0.0,
+        0.2,  0.6, 0.0,
+        0.0,  0.0, 0.0,
 
-         0.5,  0.5, 0.0,
+        0.2,  0.6, 0.0,
+        0.6,  0.2, 0.0,
+        0.0,  0.0, 0.0,
 
-         0.5, -0.5, 0.0,
+        0.6,  0.2, 0.0,
+        0.6, -0.2, 0.0,
+        0.0,  0.0, 0.0,
+
+        0.6, -0.2, 0.0,
+        0.2, -0.6, 0.0,
+        0.0,  0.0, 0.0,
+
+        0.2, -0.6, 0.0,
+        -0.2, -0.6, 0.0,
+        0.0,  0.0, 0.0,
+
+        -0.2, -0.6, 0.0,
+        -0.6, -0.2, 0.0,
+        0.0,  0.0, 0.0
 	};
 
 	GLuint VBO, VAO;

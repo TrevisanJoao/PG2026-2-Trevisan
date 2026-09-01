@@ -8,7 +8,8 @@ using namespace std;
 void key_callback(GLFWwindow *window, int key, int scancode, int action, int mode);
 
 int setupShader();
-int setupGeometryDots();
+int setupGeometryCircle();
+int setupGeometryBorder();
 
 const GLuint WIDTH = 800, HEIGHT = 600;
 
@@ -62,7 +63,8 @@ int main()
 
 	GLuint shaderID = setupShader();
 
-	GLuint VAO1 = setupGeometryDots();
+	GLuint VAO1 = setupGeometryCircle();
+    GLuint VAO2 = setupGeometryBorder();
 
 	GLint colorLoc = glGetUniformLocation(shaderID, "inputColor");
 
@@ -93,15 +95,19 @@ int main()
 
 		glfwPollEvents();
 
-		glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glLineWidth(10);
 		glPointSize(20);
 
+        glBindVertexArray(VAO2);
+		glUniform4f(colorLoc, 0.647f, 0.165f, 0.165f, 1.0f);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 8);
+
 		glBindVertexArray(VAO1);
-		glUniform4f(colorLoc, 0.0f, 0.0f, 0.0f, 1.0f);
-		glDrawArrays(GL_POINTS, 0, 5);
+		glUniform4f(colorLoc, 1.0f, 1.0f, 0.0f, 1.0f);
+		glDrawArrays(GL_TRIANGLE_FAN, 0, 8);
 
 		glfwSwapBuffers(window);
 	}
@@ -160,18 +166,51 @@ int setupShader()
 	return shaderProgram;
 }
 
-int setupGeometryDots()
+int setupGeometryCircle()
 {
 	GLfloat vertices[] = {
-		-0.5, -0.5, 0.0,     
+         0.0f,  0.0f, 0.0f,
 
-        -0.5,  0.5, 0.0,
+        -0.424f, -0.424f, 0.0f,
+        -0.520f, -0.300f, 0.0f,
+        -0.579f, -0.155f, 0.0f,
+        -0.6f,  0.0f, 0.0f,
+        -0.579f,  0.155f, 0.0f,
+        -0.520f,  0.300f, 0.0f,
+        -0.424f,  0.424f, 0.0f,
 
-         0.0,  0.0, 0.0,
+	};
 
-         0.5,  0.5, 0.0,
+	GLuint VBO, VAO;
+	glGenBuffers(1, &VBO);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-         0.5, -0.5, 0.0,
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	return VAO;
+}
+
+int setupGeometryBorder()
+{
+	GLfloat vertices[] = {
+         0.0f,  0.0f, 0.0f,
+
+        -0.495f, -0.495f, 0.0f,
+        -0.607f, -0.350f, 0.0f,
+        -0.676f, -0.181f, 0.0f,
+        -0.700f,  0.0f,   0.0f,
+        -0.676f,  0.181f, 0.0f,
+        -0.607f,  0.350f, 0.0f,
+        -0.495f,  0.495f, 0.0f,
+
 	};
 
 	GLuint VBO, VAO;
