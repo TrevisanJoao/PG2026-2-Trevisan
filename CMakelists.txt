@@ -42,15 +42,23 @@ include_directories(${stb_image_SOURCE_DIR})
 # OBS.: Não pode ter acentos ou caracteres especiais
 set(EXERCISES
     Exemplos/HelloTriangle
-    Exercises/List1/Ex1/1A
-    Exercises/List1/Ex1/1B
-    Exercises/List1/Ex1/1C
-    Exercises/List1/Ex1/1D
-    Exercises/List1/Ex2/2A
-    Exercises/List1/Ex2/2B
-    Exercises/List1/Ex2/2C
-    Exercises/List1/Ex2/2D
-    Exercises/List1/Ex3
+    Exemplos/HelloOrtho
+    Exemplos/HelloTransforms    
+    Exercises/List1/L1Ex1/1A
+    Exercises/List1/L1Ex1/1B
+    Exercises/List1/L1Ex1/1C
+    Exercises/List1/L1Ex1/1D
+    Exercises/List1/L1Ex2/2A
+    Exercises/List1/L1Ex2/2B
+    Exercises/List1/L1Ex2/2C
+    Exercises/List1/L1Ex2/2D
+    Exercises/List1/L1Ex3
+    Exercises/List2/L2Ex1
+    Exercises/List2/L2Ex2
+    Exercises/List2/L2Ex3
+    Exercises/List2/L2Ex4
+    Exercises/List2/L2Ex5
+    Exercises/List2/L2Ex6
 )
 
 add_compile_options(-Wno-pragmas)
