@@ -15,6 +15,9 @@
 #include <cmath>
 #include <vector>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 using namespace glm;
 
 // ---------------------------------------------------------------------------
@@ -164,182 +167,6 @@ static GLuint makeTex(const unsigned char* rgba, int w, int h)
 }
 
 // ---------------------------------------------------------------------------
-// Sprite pixel art — string-encoded, 13×13 per frame.
-// Each char is one pixel. Decoded via paletteColor().
-// Frames are combined into a horizontal spritesheet at load time.
-// ---------------------------------------------------------------------------
-static const unsigned char PAL_TRANSPARENT[4] = {0,0,0,0};
-
-static const unsigned char PALETTE[][4] = {
-// idx  key  description
-    {0x00,0x00,0x00,0x00}, // 0  '.'  transparent
-    {0xFF,0xCC,0x99,0xFF}, // 1  'n'  skin
-    {0x33,0x55,0xAA,0xFF}, // 2  'b'  blue shirt
-    {0x55,0x33,0x11,0xFF}, // 3  'h'  brown (hair/pants)
-    {0x44,0x33,0x22,0xFF}, // 4  'm'  dark boots/gun
-    {0xCC,0x33,0x33,0xFF}, // 5  'r'  red (eye/blood)
-    {0x77,0xEE,0x77,0xFF}, // 6  'g'  zombie green (light)
-    {0x33,0x99,0x33,0xFF}, // 7  'd'  zombie dark green
-    {0xFF,0xEE,0x00,0xFF}, // 8  'y'  yellow bullet
-    {0xFF,0x88,0x00,0xFF}, // 9  'o'  orange glow
-    {0xAA,0x88,0x66,0xFF}, // 10 'l'  gun metal
-};
-
-static const unsigned char* paletteColor(char c)
-{
-    switch(c){
-        case 'n': return PALETTE[1];
-        case 'b': return PALETTE[2];
-        case 'h': return PALETTE[3];
-        case 'm': return PALETTE[4];
-        case 'r': return PALETTE[5];
-        case 'g': return PALETTE[6];
-        case 'd': return PALETTE[7];
-        case 'y': return PALETTE[8];
-        case 'o': return PALETTE[9];
-        case 'l': return PALETTE[10];
-        default:  return PALETTE[0]; // '.' = transparent
-    }
-}
-
-// Build a (fw*nFrames) × fh spritesheet by interleaving frames horizontally.
-// Each frame string must be fw*fh characters (row-major).
-static GLuint buildSpritesheet(const char** frames, int nFrames, int fw, int fh)
-{
-    int totalW = fw * nFrames;
-    std::vector<unsigned char> atlas(totalW * fh * 4, 0);
-    for(int f = 0; f < nFrames; f++){
-        for(int y = 0; y < fh; y++){
-            for(int x = 0; x < fw; x++){
-                char c = frames[f][y*fw + x];
-                const unsigned char* col = paletteColor(c);
-                int dst = (y*totalW + (f*fw + x))*4;
-                atlas[dst+0]=col[0]; atlas[dst+1]=col[1];
-                atlas[dst+2]=col[2]; atlas[dst+3]=col[3];
-            }
-        }
-    }
-    return makeTex(atlas.data(), totalW, fh);
-}
-
-// ---------------------------------------------------------------------------
-// Sprite definitions  (13 chars per row × 13 rows = 169 chars per frame)
-// ---------------------------------------------------------------------------
-
-// Player — 2 frames (idle, shooting)
-static const char* PLAYER_FRAMES[] = {
-    // frame 0: idle
-    ".....hh......"
-    "....nnnn....."
-    "....nrnn....."
-    "....nnnn....."
-    "...bbbbbbb..."
-    "..bbbbbbbbb.."
-    "..bbbbbbbbb.."
-    "..bbbbbbbbb.."
-    "..nbbbbbbbn.."
-    "...hh...hh..."
-    "...hh...hh..."
-    "...mm...mm..."
-    "...mm...mm...",
-
-    // frame 1: shooting (arm+gun extended right)
-    ".....hh......"
-    "....nnnn....."
-    "....nrnn....."
-    "....nnnn....."
-    "...bbbbbbb..."
-    "..bbbbbbbbb.."
-    "..bbbbbbbbb.."
-    "..bbbbbbbbb.."
-    ".nbbbbblllll."
-    "...hh...hh..."
-    "...hh...hh..."
-    "...mm...mm..."
-    "...mm...mm...",
-};
-
-// Zombie — 4 walk frames (legs alternate)
-static const char* ZOMBIE_FRAMES[] = {
-    // frame 0
-    ".....gg......"
-    "....ggggg...."
-    "....grgrg...."
-    "....ggggg...."
-    "...ddddddd..."
-    "..ddddddddd.."
-    "..ddddddddd.."
-    ".gddddddddg.."
-    ".ggdddddgg..."
-    "...hh...hh..."
-    "...hh...hh..."
-    "...mm...mm..."
-    "...mm...mm...",
-
-    // frame 1: right leg forward
-    ".....gg......"
-    "....ggggg...."
-    "....grgrg...."
-    "....ggggg...."
-    "...ddddddd..."
-    "..ddddddddd.."
-    "..ddddddddd.."
-    ".gddddddddg.."
-    ".ggdddddgg..."
-    "..hh....hh..."
-    "..hh....hh..."
-    "..mm....mm..."
-    "..mm....mm...",
-
-    // frame 2: neutral (same as 0)
-    ".....gg......"
-    "....ggggg...."
-    "....grgrg...."
-    "....ggggg...."
-    "...ddddddd..."
-    "..ddddddddd.."
-    "..ddddddddd.."
-    ".gddddddddg.."
-    ".ggdddddgg..."
-    "...hh...hh..."
-    "...hh...hh..."
-    "...mm...mm..."
-    "...mm...mm...",
-
-    // frame 3: left leg forward
-    ".....gg......"
-    "....ggggg...."
-    "....grgrg...."
-    "....ggggg...."
-    "...ddddddd..."
-    "..ddddddddd.."
-    "..ddddddddd.."
-    ".gddddddddg.."
-    ".ggdddddgg..."
-    "...hh....hh.."
-    "...hh....hh.."
-    "...mm....mm.."
-    "...mm....mm..",
-};
-
-// Bullet — 1 frame
-static const char* BULLET_FRAMES[] = {
-    "............."
-    "............."
-    ".....oo......"
-    "....oyyo....."
-    "....oyyo....."
-    "....oyyo....."
-    "....oyyo....."
-    "....oyyo....."
-    "....oyyo....."
-    "....oyyo....."
-    "....oyyo....."
-    ".....oo......"
-    ".............",
-};
-
-// ---------------------------------------------------------------------------
 // Background gradient tiles (4×64, built at startup)
 // ---------------------------------------------------------------------------
 static void buildBgTile(unsigned char* buf, int w, int h,
@@ -359,9 +186,18 @@ static void buildBgTile(unsigned char* buf, int w, int h,
 
 static void loadTextures()
 {
-    gTexPlayer = buildSpritesheet(PLAYER_FRAMES, 2, 13, 13);
-    gTexZombie = buildSpritesheet(ZOMBIE_FRAMES, 4, 13, 13);
-    gTexBullet = buildSpritesheet(BULLET_FRAMES, 1, 13, 13);
+    auto loadPNG = [](const char* path) -> GLuint {
+        int w, h, ch;
+        unsigned char* data = stbi_load(path, &w, &h, &ch, 4);
+        if(!data){ fprintf(stderr, "Failed to load texture: %s\n", path); return 0; }
+        GLuint t = makeTex(data, w, h);
+        stbi_image_free(data);
+        return t;
+    };
+
+    gTexPlayer = loadPNG(ASSETS_DIR "survivor.png");
+    gTexZombie = loadPNG(ASSETS_DIR "zombie.png");
+    gTexBullet = loadPNG(ASSETS_DIR "bullet.png");
 
     static unsigned char bg0[4*64*4], bg1[4*64*4], bg2[4*64*4];
     buildBgTile(bg0,4,64, 0x08,0x08,0x08, 0x0D,0x0D,0x0D);
@@ -679,7 +515,7 @@ static void render()
     for(auto& e : gEnemies){
         if(!e.active) continue;
         float ex = e.x - SPRITE_SIZE*0.5f;
-        drawSprite(gTexZombie, ex, e.y, SPRITE_SIZE, e.frame, 4);
+        drawSprite(gTexZombie, ex, e.y, SPRITE_SIZE, 0, 1);
         // HP bar
         float bw = SPRITE_SIZE, bh=4.f, bx=ex, by=e.y-7.f;
         drawRect(bx, by, bw, bh, 0.3f,0.f,0.f);
@@ -690,7 +526,7 @@ static void render()
     drawSprite(gTexPlayer,
                gPlayer.x - SPRITE_SIZE*0.5f,
                PLAYER_Y  - SPRITE_SIZE*0.5f,
-               SPRITE_SIZE, gPlayer.frame, 2);
+               SPRITE_SIZE, 0, 1);
 
     // HUD: lives
     drawText("LIVES:",10,10,3.f, 1,1,1);
