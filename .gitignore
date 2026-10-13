@@ -33,4 +33,8 @@ CMakeUserPresets.json
 .DS_Store
 Thumbs.db
 
+# Documentos locais
+EXPLANATION.md
+PRESENTATION.md
+
 
