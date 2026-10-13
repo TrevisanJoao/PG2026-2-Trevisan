@@ -27,7 +27,8 @@ static const int   WIN_W        = 800;
 static const int   WIN_H        = 600;
 static const float SPRITE_PX    = 13.0f;
 static const float SPRITE_SCALE = 4.0f;
-static const float SPRITE_SIZE  = SPRITE_PX * SPRITE_SCALE; // 52px on screen
+static const float SPRITE_SIZE  = SPRITE_PX * SPRITE_SCALE; // 52px on screen (bullet)
+static const float CHAR_SIZE    = 80.0f;                     // player & zombie display size
 static const float PLAYER_Y     = 545.0f;  // center-y of player
 static const float DANGER_Y     = 490.0f;  // danger line (top edge)
 static const float PLAYER_SPEED = 250.0f;  // px/sec
@@ -39,8 +40,8 @@ static const int   ENEMY_MAX_HP = 3;
 static const int   MAX_ENEMIES  = 5;
 static const int   MAX_BULLETS  = 10;
 static const int   PLAYER_LIVES = 3;
-static const float SPAWN_MIN    = 5.0f;
-static const float SPAWN_MAX    = 10.0f;
+static const float SPAWN_MIN    = 2.0f;
+static const float SPAWN_MAX    = 5.0f;
 static const float ANIM_FPS     = 6.0f;
 
 // ---------------------------------------------------------------------------
@@ -57,6 +58,7 @@ static Player    gPlayer;
 static Bullet    gBullets[MAX_BULLETS];
 static Enemy     gEnemies[MAX_ENEMIES];
 static int       gLives;
+static int       gScore;
 static float     gSpawnTimer, gNextSpawn;
 static float     gBgOff[3];
 static bool      gKeyLeft, gKeyRight, gKeyShoot;
@@ -343,6 +345,7 @@ static void resetGame()
     for(auto& b : gBullets) b.active = false;
     for(auto& e : gEnemies) e.active = false;
     gLives      = PLAYER_LIVES;
+    gScore      = 0;
     gSpawnTimer = 0;
     gNextSpawn  = randF(SPAWN_MIN, SPAWN_MAX);
     gBgOff[0]=gBgOff[1]=gBgOff[2]=0;
@@ -353,8 +356,8 @@ static void spawnEnemy()
     for(auto& e : gEnemies){
         if(!e.active){
             e.active    = true;
-            e.x         = randF(SPRITE_SIZE*0.5f, WIN_W-SPRITE_SIZE*0.5f);
-            e.y         = -SPRITE_SIZE;
+            e.x         = randF(CHAR_SIZE*0.5f, WIN_W-CHAR_SIZE*0.5f);
+            e.y         = -CHAR_SIZE;
             e.hp        = ENEMY_MAX_HP;
             e.frame     = 0;
             e.animTimer = 0;
@@ -423,7 +426,7 @@ static void update(float dt)
             e.frame = (e.frame+1)%4;
         }
         // Crossed danger line?
-        if(e.y + SPRITE_SIZE >= DANGER_Y){
+        if(e.y + CHAR_SIZE >= DANGER_Y){
             e.active = false;
             if(--gLives <= 0){ gLives=0; gState=STATE_GAMEOVER; return; }
         }
@@ -436,11 +439,12 @@ static void update(float dt)
         float by1=b.y,       by2=by1+SPRITE_SIZE;
         for(auto& e : gEnemies){
             if(!e.active) continue;
-            float ex1=e.x-half, ex2=ex1+SPRITE_SIZE;
-            float ey1=e.y,      ey2=ey1+SPRITE_SIZE;
+            float eHalf = CHAR_SIZE*0.5f;
+            float ex1=e.x-eHalf, ex2=ex1+CHAR_SIZE;
+            float ey1=e.y,        ey2=ey1+CHAR_SIZE;
             if(bx1<ex2 && bx2>ex1 && by1<ey2 && by2>ey1){
                 b.active = false;
-                if(--e.hp <= 0) e.active = false;
+                if(--e.hp <= 0){ e.active = false; gScore++; }
                 break;
             }
         }
@@ -495,6 +499,9 @@ static void render()
     if(gState == STATE_GAMEOVER){
         drawRect(160,220, 480,70, 0.15f,0.f,0.f);
         drawText("GAME OVER", 175,230, 6.f, 1.f,0.15f,0.15f);
+        char scoreStr[16]; sprintf(scoreStr, "%d", gScore);
+        drawText("SCORE:", 270,295, 4.f, 1,1,1);
+        drawText(scoreStr,  374,295, 4.f, 0.2f,1.f,0.2f);
         drawRect(220,320, 360,40, 0.f,0.f,0.f,0.6f);
         drawText("PRESS ENTER",222,330,5.f, blink,blink*0.8f,0.f);
         return;
@@ -514,19 +521,19 @@ static void render()
     // Enemies + HP bars
     for(auto& e : gEnemies){
         if(!e.active) continue;
-        float ex = e.x - SPRITE_SIZE*0.5f;
-        drawSprite(gTexZombie, ex, e.y, SPRITE_SIZE, 0, 1);
+        float ex = e.x - CHAR_SIZE*0.5f;
+        drawSprite(gTexZombie, ex, e.y, CHAR_SIZE, 0, 1);
         // HP bar
-        float bw = SPRITE_SIZE, bh=4.f, bx=ex, by=e.y-7.f;
+        float bw = CHAR_SIZE, bh=4.f, bx=ex, by=e.y-7.f;
         drawRect(bx, by, bw, bh, 0.3f,0.f,0.f);
         drawRect(bx, by, bw*(float)e.hp/ENEMY_MAX_HP, bh, 0.f,0.85f,0.f);
     }
 
     // Player
     drawSprite(gTexPlayer,
-               gPlayer.x - SPRITE_SIZE*0.5f,
-               PLAYER_Y  - SPRITE_SIZE*0.5f,
-               SPRITE_SIZE, 0, 1);
+               gPlayer.x - CHAR_SIZE*0.5f,
+               PLAYER_Y  - CHAR_SIZE*0.5f,
+               CHAR_SIZE, 0, 1);
 
     // HUD: lives
     drawText("LIVES:",10,10,3.f, 1,1,1);
@@ -535,6 +542,12 @@ static void render()
         float g = 0.1f;
         drawRect(90+i*18.f, 10, 14, 22, r, g, g);
     }
+
+    // HUD: score
+    char scoreStr[16];
+    sprintf(scoreStr, "%d", gScore);
+    drawText("SCORE:", 530, 10, 3.f, 1,1,1);
+    drawText(scoreStr,  622, 10, 3.f, 0.2f,1.f,0.2f);
 }
 
 // ---------------------------------------------------------------------------
