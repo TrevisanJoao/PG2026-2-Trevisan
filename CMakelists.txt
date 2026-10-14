@@ -59,6 +59,7 @@ set(EXERCISES
     Exercises/List2/L2Ex4
     Exercises/List2/L2Ex5
     Exercises/List2/L2Ex6
+    FromScratch/HelloWindow
     GA/ZombieShooter
 )
 
