@@ -61,6 +61,7 @@ set(EXERCISES
     Exercises/List2/L2Ex6
     FromScratch/HelloWindow
     GA/ZombieShooter
+    FromScratch/HelloTriangleAgain
 )
 
 add_compile_options(-Wno-pragmas)

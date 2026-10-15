@@ -39,7 +39,7 @@ static const float ANIM_FPS     = 6.0f;
 
 // Game state
 enum GameState { STATE_MENU, STATE_PLAYING, STATE_GAMEOVER };
-
+// 
 struct Player { float x; float shootTimer; int frame; float animTimer; };
 struct Bullet  { float x, y; bool active; };
 struct Enemy   { float x, y; int hp; bool active; int frame; float animTimer; };
@@ -55,6 +55,7 @@ static float     gBgOff[3];
 static bool      gKeyLeft, gKeyRight, gKeyShoot;
 
 // Shaders
+//vertex
 static const char* VS = R"glsl(
 #version 330 core
 layout(location=0) in vec2 pos;
@@ -70,6 +71,8 @@ void main(){
 }
 )glsl";
 
+
+//fragment
 static const char* FS = R"glsl(
 #version 330 core
 in vec2 vUV;
@@ -95,7 +98,7 @@ static mat4   gProj;
 
 static GLuint gTexPlayer, gTexZombie, gTexBullet, gTexBg[3];
 
-// Compile / link
+// Compile
 static GLuint compileShader(GLenum type, const char* src)
 {
     GLuint s = glCreateShader(type);
@@ -120,8 +123,8 @@ static GLuint buildProgram()
 static void setupQuad()
 {
     float v[] = {
-        0,0,  0,0,   1,0,  1,0,   1,1,  1,1,
-        0,0,  0,0,   1,1,  1,1,   0,1,  0,1,
+        0,0,0,0,   1,0,1,0,   1,1,1,1,
+        0,0,0,0,   1,1,1,1,   0,1,0,1,
     };
     glGenVertexArrays(1,&gVAO);
     glGenBuffers(1,&gVBO);
@@ -189,7 +192,6 @@ static void loadTextures()
     gTexBg[2] = makeTex(bg2,4,64);
 }
 
-// Drawing helpers
 static void setModel(float px, float py, float pw, float ph)
 {
     mat4 m = translate(mat4(1.f), vec3(px,py,0));
@@ -377,13 +379,13 @@ static void update(float dt)
     }
     gKeyShoot = false;
 
-    // Player animation: hold shooting frame for animTimer, then return to idle
+    // Player animation:
     if(gPlayer.frame == 1){
         gPlayer.animTimer -= dt;
         if(gPlayer.animTimer <= 0) gPlayer.frame = 0;
     }
 
-    // Bullets
+    // Bullets movement
     for(auto& b : gBullets){
         if(!b.active) continue;
         b.y -= BULLET_SPEED * dt;
@@ -399,7 +401,7 @@ static void update(float dt)
             e.animTimer = 0;
             e.frame = (e.frame+1)%4;
         }
-        // Crossed danger line?
+        // Crossed danger line
         if(e.y + CHAR_SIZE >= DANGER_Y){
             e.active = false;
             if(--gLives <= 0){ gLives=0; gState=STATE_GAMEOVER; return; }
