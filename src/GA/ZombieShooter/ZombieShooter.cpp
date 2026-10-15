@@ -1,7 +1,3 @@
-// ZombieShooter - Grau A
-// OpenGL 3.3 core, GLFW, GLM
-// Pixel-art shooter: player slides and shoots, zombies descend from the top.
-
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
@@ -20,20 +16,17 @@
 
 using namespace glm;
 
-// ---------------------------------------------------------------------------
 // Constants
-// ---------------------------------------------------------------------------
 static const int   WIN_W        = 800;
 static const int   WIN_H        = 600;
 static const float SPRITE_PX    = 13.0f;
 static const float SPRITE_SCALE = 4.0f;
-static const float SPRITE_SIZE  = SPRITE_PX * SPRITE_SCALE; // 52px on screen (bullet)
-static const float CHAR_SIZE    = 80.0f;                     // player & zombie display size
-static const float PLAYER_Y     = 545.0f;  // center-y of player
-static const float DANGER_Y     = 490.0f;  // danger line (top edge)
-static const float PLAYER_SPEED = 250.0f;  // px/sec
-static const float BULLET_SPEED = 450.0f;  // px/sec upward
-// enemy crosses DANGER_Y in 15 seconds from y = -SPRITE_SIZE
+static const float SPRITE_SIZE  = SPRITE_PX * SPRITE_SCALE;
+static const float CHAR_SIZE    = 80.0f;
+static const float PLAYER_Y     = 545.0f;
+static const float DANGER_Y     = 490.0f;
+static const float PLAYER_SPEED = 250.0f; 
+static const float BULLET_SPEED = 450.0f; 
 static const float ENEMY_SPEED  = (DANGER_Y + SPRITE_SIZE) / 15.0f;
 static const float SHOOT_CD     = 0.5f;
 static const int   ENEMY_MAX_HP = 3;
@@ -44,9 +37,7 @@ static const float SPAWN_MIN    = 2.0f;
 static const float SPAWN_MAX    = 5.0f;
 static const float ANIM_FPS     = 6.0f;
 
-// ---------------------------------------------------------------------------
 // Game state
-// ---------------------------------------------------------------------------
 enum GameState { STATE_MENU, STATE_PLAYING, STATE_GAMEOVER };
 
 struct Player { float x; float shootTimer; int frame; float animTimer; };
@@ -63,9 +54,7 @@ static float     gSpawnTimer, gNextSpawn;
 static float     gBgOff[3];
 static bool      gKeyLeft, gKeyRight, gKeyShoot;
 
-// ---------------------------------------------------------------------------
 // Shaders
-// ---------------------------------------------------------------------------
 static const char* VS = R"glsl(
 #version 330 core
 layout(location=0) in vec2 pos;
@@ -99,18 +88,14 @@ void main(){
 }
 )glsl";
 
-// ---------------------------------------------------------------------------
 // OpenGL handles
-// ---------------------------------------------------------------------------
 static GLuint gShader, gVAO, gVBO;
 static GLint  uProj, uModel, uUVOff, uUVScl, uTint, uTex, uUseTex;
 static mat4   gProj;
 
 static GLuint gTexPlayer, gTexZombie, gTexBullet, gTexBg[3];
 
-// ---------------------------------------------------------------------------
 // Compile / link
-// ---------------------------------------------------------------------------
 static GLuint compileShader(GLenum type, const char* src)
 {
     GLuint s = glCreateShader(type);
@@ -131,9 +116,7 @@ static GLuint buildProgram()
     return p;
 }
 
-// ---------------------------------------------------------------------------
-// Quad VAO — unit square [0,1]x[0,1], reused for every drawn object
-// ---------------------------------------------------------------------------
+// VAO
 static void setupQuad()
 {
     float v[] = {
@@ -152,9 +135,7 @@ static void setupQuad()
     glBindVertexArray(0);
 }
 
-// ---------------------------------------------------------------------------
-// Texture from RGBA bytes
-// ---------------------------------------------------------------------------
+// Texture
 static GLuint makeTex(const unsigned char* rgba, int w, int h)
 {
     GLuint t;
@@ -168,9 +149,7 @@ static GLuint makeTex(const unsigned char* rgba, int w, int h)
     return t;
 }
 
-// ---------------------------------------------------------------------------
-// Background gradient tiles (4×64, built at startup)
-// ---------------------------------------------------------------------------
+// Background gradient
 static void buildBgTile(unsigned char* buf, int w, int h,
                         int r0,int g0,int b0, int r1,int g1,int b1)
 {
@@ -210,9 +189,7 @@ static void loadTextures()
     gTexBg[2] = makeTex(bg2,4,64);
 }
 
-// ---------------------------------------------------------------------------
 // Drawing helpers
-// ---------------------------------------------------------------------------
 static void setModel(float px, float py, float pw, float ph)
 {
     mat4 m = translate(mat4(1.f), vec3(px,py,0));
@@ -220,7 +197,7 @@ static void setModel(float px, float py, float pw, float ph)
     glUniformMatrix4fv(uModel,1,GL_FALSE,value_ptr(m));
 }
 
-// textured sprite: px,py = top-left; frame & nFrames for UV selection
+// textured sprite
 static void drawSprite(GLuint tex, float px, float py, float sz,
                        int frame, int nFrames)
 {
@@ -261,9 +238,7 @@ static void drawBackground(int idx, float offsetPx)
     glDrawArrays(GL_TRIANGLES,0,6);
 }
 
-// ---------------------------------------------------------------------------
-// Minimal 3×5 bitmap font for HUD/menu text
-// ---------------------------------------------------------------------------
+// font for HUD/menu text
 static const unsigned char FONT_AZ[26][15] = {
     {0,1,0, 1,0,1, 1,1,1, 1,0,1, 1,0,1}, // A
     {1,1,0, 1,0,1, 1,1,0, 1,0,1, 1,1,0}, // B
@@ -332,9 +307,7 @@ static void drawText(const char* str, float px, float py, float cs,
     }
 }
 
-// ---------------------------------------------------------------------------
 // Game logic
-// ---------------------------------------------------------------------------
 static float randF(float lo, float hi){
     return lo + ((float)rand()/RAND_MAX)*(hi-lo);
 }
@@ -351,6 +324,7 @@ static void resetGame()
     gBgOff[0]=gBgOff[1]=gBgOff[2]=0;
 }
 
+// spawn enemies randomly in a inteval
 static void spawnEnemy()
 {
     for(auto& e : gEnemies){
@@ -372,7 +346,7 @@ static int enemyCount(){
 
 static void update(float dt)
 {
-    // Parallax scroll (always runs, even on menu/gameover screens)
+    // scroll
     gBgOff[0] += 5.f  * dt;
     gBgOff[1] += 15.f * dt;
     gBgOff[2] += 30.f * dt;
@@ -391,7 +365,7 @@ static void update(float dt)
     if(gKeyShoot && gPlayer.shootTimer <= 0){
         gPlayer.shootTimer = SHOOT_CD;
         gPlayer.frame      = 1;
-        gPlayer.animTimer  = 0.2f; // show shooting frame briefly
+        gPlayer.animTimer  = 0.2f;
         for(auto& b : gBullets){
             if(!b.active){
                 b.active = true;
@@ -435,10 +409,12 @@ static void update(float dt)
     // Bullet × Enemy AABB collisions
     for(auto& b : gBullets){
         if(!b.active) continue;
+        //bullet hitbox
         float bx1=b.x-half, bx2=bx1+SPRITE_SIZE;
         float by1=b.y,       by2=by1+SPRITE_SIZE;
         for(auto& e : gEnemies){
             if(!e.active) continue;
+            //enemies hitbox
             float eHalf = CHAR_SIZE*0.5f;
             float ex1=e.x-eHalf, ex2=ex1+CHAR_SIZE;
             float ey1=e.y,        ey2=ey1+CHAR_SIZE;
@@ -461,9 +437,7 @@ static void update(float dt)
     }
 }
 
-// ---------------------------------------------------------------------------
 // Render
-// ---------------------------------------------------------------------------
 static void render()
 {
     glClearColor(0,0,0,1);
@@ -550,9 +524,7 @@ static void render()
     drawText(scoreStr,  622, 10, 3.f, 0.2f,1.f,0.2f);
 }
 
-// ---------------------------------------------------------------------------
 // GLFW callbacks
-// ---------------------------------------------------------------------------
 static void onKey(GLFWwindow* win, int key, int /*sc*/, int action, int /*mods*/)
 {
     if(action==GLFW_PRESS && key==GLFW_KEY_ESCAPE)
@@ -569,9 +541,7 @@ static void onKey(GLFWwindow* win, int key, int /*sc*/, int action, int /*mods*/
     if(action==GLFW_PRESS  && key==GLFW_KEY_SPACE) gKeyShoot = true;
 }
 
-// ---------------------------------------------------------------------------
 // main
-// ---------------------------------------------------------------------------
 int main()
 {
     srand((unsigned)time(nullptr));
