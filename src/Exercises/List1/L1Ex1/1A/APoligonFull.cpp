@@ -22,7 +22,7 @@ const GLchar *vertexShaderSource = R"glsl(
  }
  )glsl";
 
-const GLchar *fragmentShaderSource = R"glsl(
+const GLchar *fragmentShaderSourceA = R"glsl(
  #version 400
  uniform vec4 inputColor;
  out vec4 color;
@@ -140,7 +140,7 @@ int setupShader()
 				  << infoLog << std::endl;
 	}
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSourceA, NULL);
 	glCompileShader(fragmentShader);
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success)

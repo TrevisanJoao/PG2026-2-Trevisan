@@ -64,7 +64,7 @@ const GLchar *vertexShaderSource = R"glsl(
  )glsl";
 
 // Código fonte do Fragment Shader (em GLSL): ainda hardcoded
-const GLchar *fragmentShaderSource = R"glsl(
+const GLchar *fragmentShaderSourceA = R"glsl(
  #version 400
  uniform vec4 inputColor;
  out vec4 color;
@@ -245,7 +245,7 @@ int setupShader()
 	}
 	// Fragment shader
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSourceA, NULL);
 	glCompileShader(fragmentShader);
 	// Checando erros de compilação (exibição via log no terminal)
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);

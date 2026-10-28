@@ -23,7 +23,7 @@ const GLchar *vertexShaderSource = R"glsl(
  }
  )glsl";
 
-const GLchar *fragmentShaderSource = R"glsl(
+const GLchar *fragmentShaderSourceA = R"glsl(
  #version 400
  uniform vec4 inputColor;
  out vec4 color;
@@ -148,7 +148,7 @@ int setupShader()
 				  << infoLog << std::endl;
 	}
 	GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+	glShaderSource(fragmentShader, 1, &fragmentShaderSourceA, NULL);
 	glCompileShader(fragmentShader);
 	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
 	if (!success)
@@ -171,7 +171,6 @@ int setupShader()
 	}
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
-
 	return shaderProgram;
 }
 
@@ -185,16 +184,13 @@ int setupGeometryDot1()
 	glGenBuffers(1, &VBO);
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glBindVertexArray(0);
-
 	return VAO;
 }
 
