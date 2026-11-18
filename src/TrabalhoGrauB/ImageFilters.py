@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 
 
-def grayscale_filter(image_path):
+def grayscale_filter(image_path: str):
     # removes the image colors and preserves the luminosity, turning it gray
     img = cv.imread(image_path)
     if img is None:
@@ -27,19 +27,24 @@ def grayscale_filter(image_path):
 
     return img, imgGrayScale
 
-def gaussian_blur(image_path, intensity, channel_R=True, channel_G=True, channel_B=True):
-    # 
+def gaussian_blur(image_path: str, intensity: int):
+    # reduce sharpness and detail making an image appear smoother
+    ratio = 3  + (intensity * 2)
     img = cv.imread(image_path)
-    # copy() creates a indpendent copy of a image
-    imgR = img.copy() 
-    imgG = img.copy()
-    imgB = img.copy()
+    gaussian = cv.GaussianBlur(img, (ratio, ratio), 0)
+    return img, gaussian
 
-    height = img.shape[0]
-    lenght = img.shape[1]
-
-
-    return None
+def sharpening_filter(image_path: str, intensity: int):
+    # increases the image details definition
+    img = cv.imread(image_path)
+    adjacent_pixel = -(intensity / 2)
+    central_pixel = (intensity * 3)
+    first_array = [0, adjacent_pixel, 0]
+    second_array = [adjacent_pixel, central_pixel, adjacent_pixel]
+    third_array = first_array
+    kernel = np.array([first_array, second_array, third_array])
+    sharpened_image = cv.filter2D(img, -1, kernel)
+    return img, sharpened_image
 
 def enhancement_filter():
     #
@@ -65,6 +70,3 @@ def cartoon_effec():
     # makes the image look like a cartoon
     return None
 
-def sharpening():
-    # increases the image details definition
-    return None
