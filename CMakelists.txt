@@ -62,6 +62,7 @@ set(EXERCISES
     FromScratch/HelloWindow
     GA/ZombieShooter
     FromScratch/HelloTriangleAgain
+    FromScratch/HelloShaders
 )
 
 add_compile_options(-Wno-pragmas)
