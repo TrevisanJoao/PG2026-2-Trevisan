@@ -2,9 +2,8 @@ import numpy as np
 import cv2 as cv
 
 
-def grayscale_filter(image_path: str):
+def grayscale_filter(img):
     # removes the image colors and preserves the luminosity, turning it gray
-    img = cv.imread(image_path)
     if img is None:
         print("Error: Could not load image!")
         return None, None
