@@ -1,5 +1,3 @@
-"""Menus e interação com o usuário para o editor de fotos e vídeos."""
-
 from __future__ import annotations
 
 from datetime import datetime
