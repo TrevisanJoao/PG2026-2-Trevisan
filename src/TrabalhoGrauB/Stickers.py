@@ -1,5 +1,3 @@
-"""Criação e aplicação de stickers PNG com transparência (canal alfa)."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -93,7 +91,6 @@ def _save_default_stickers() -> list[tuple[str, str]]:
 
 
 def get_available_stickers() -> list[tuple[str, str]]:
-    """Retorna cinco stickers padrão e qualquer PNG adicional da pasta stickers."""
     defaults = _save_default_stickers()
     known_paths = {Path(path).resolve() for _, path in defaults}
     for path in sorted(STICKER_DIR.glob("*.png")):
@@ -119,11 +116,6 @@ def load_sticker(sticker_path: str) -> np.ndarray:
 def apply_sticker(
     background: np.ndarray, sticker_path: str, x: int, y: int, center: bool = True
 ) -> np.ndarray:
-    """Sobrepõe um PNG com alfa na imagem e retorna uma nova imagem.
-
-    x e y representam o centro do sticker por padrão. A função recorta partes
-    que ultrapassem as bordas da imagem, em vez de descartar o sticker inteiro.
-    """
     if background is None or background.size == 0:
         raise ValueError("A imagem de fundo está vazia.")
     if background.ndim == 2:
@@ -166,7 +158,6 @@ def apply_sticker(
 
 
 class StickerEditor:
-    """Mantém uma lista de stickers posicionados sobre uma imagem base."""
 
     def __init__(self, image: np.ndarray, stickers: list[tuple[str, str]]):
         if image is None or image.size == 0:
@@ -202,6 +193,5 @@ class StickerEditor:
 
 
 def mouse_callback(event: int, x: int, y: int, flags: int, param) -> None:
-    """Callback compatível com cv.setMouseCallback."""
     if event == cv.EVENT_LBUTTONDOWN and isinstance(param, StickerEditor):
         param.place(x, y)

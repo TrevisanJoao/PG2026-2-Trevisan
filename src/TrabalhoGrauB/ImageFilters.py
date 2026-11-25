@@ -29,9 +29,9 @@ def _odd_kernel(intensity: int, minimum: int = 3, maximum: int = 31) -> int:
     return min(size, maximum if maximum % 2 else maximum - 1)
 
 
-# ---------------------------------------------------------------------------
+# =================================================================
 # Filtros
-# ---------------------------------------------------------------------------
+# =================================================================
 
 def grayscale_filter(img: np.ndarray, intensity: int = 3) -> np.ndarray:
     """Turns the image gray by taking away the color but preserving the light"""
@@ -180,7 +180,6 @@ def sobel_edge_filter(img: np.ndarray, intensity: int = 3) -> np.ndarray:
     return cv.cvtColor(result, cv.COLOR_GRAY2BGR)
 
 
-# A ordem desta lista também define os atalhos numéricos usados no modo vídeo.
 FILTERS = {
     "grayscale": {
         "name": "Escala de cinza",
@@ -288,11 +287,7 @@ def apply_filter(img: np.ndarray, filter_key: str, intensity: int = 3) -> np.nda
 def apply_filter_to_channel(
     img: np.ndarray, filter_key: str, channel: str = "ALL", intensity: int = 3
 ) -> np.ndarray:
-    """Aplica o filtro na imagem inteira ou somente em B, G ou R.
-
-    Ao escolher um canal, os outros dois são zerados, deixando visível na
-    imagem o resultado isolado do canal escolhido.
-    """
+    """Aplica o filtro na imagem inteira ou somente em B, G ou R"""
     img = _check_image(img)
     channel = channel.upper()
     if channel in ("ALL", "TODOS", "RGB"):
@@ -321,9 +316,9 @@ def apply_filter_to_channel(
     return output
 
 
-# ---------------------------------------------------------------------------
+# =================================================================-
 # Operações aritméticas entre duas imagens
-# ---------------------------------------------------------------------------
+# =================================================================
 
 def _prepare_image_pair(image_a: np.ndarray, image_b: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     image_a = _as_bgr(image_a)
@@ -334,13 +329,13 @@ def _prepare_image_pair(image_a: np.ndarray, image_b: np.ndarray) -> tuple[np.nd
 
 
 def add_images(image_a: np.ndarray, image_b: np.ndarray) -> np.ndarray:
-    """Soma duas imagens, saturando valores acima de 255."""
+    """Add two images, saturating values above 255"""
     a, b = _prepare_image_pair(image_a, image_b)
     return cv.add(a, b)
 
 
 def subtract_images(image_a: np.ndarray, image_b: np.ndarray) -> np.ndarray:
-    """Subtrai image_b de image_a; resultados negativos são limitados a zero."""
+    """Subtract image_b from image_a; negative results are limited to zero"""
     a, b = _prepare_image_pair(image_a, image_b)
     return cv.subtract(a, b)
 

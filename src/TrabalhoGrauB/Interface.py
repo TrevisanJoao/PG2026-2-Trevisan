@@ -121,7 +121,7 @@ def _apply_filter_menu(current_image):
 def _apply_arithmetic_menu(current_image):
     print("\n========== OPERAÇÕES ENTRE DUAS IMAGENS ==========")
     print("1 - Adição")
-    print("2 - Subtração (imagem atual menos segunda imagem)")
+    print("2 - Subtração")
     print("3 - Blending (mistura ponderada)")
     print("0 - Voltar")
     operation = _read_int("Escolha a operação: ", 0, 0, 3)
@@ -155,7 +155,7 @@ def _run_sticker_editor(current_image):
         print(f"{index} - {name}")
     print("Na janela da imagem:")
     print("  Clique com o botão esquerdo para posicionar o sticker ativo.")
-    print("  Pressione 1-9 para selecionar um sticker (ou use o menu para outros).")
+    print("  Pressione 1-5 para selecionar um sticker")
     print("  U = desfazer | C = limpar stickers | ENTER ou Q = concluir")
 
     cv.namedWindow(window_name, cv.WINDOW_NORMAL)
@@ -166,7 +166,7 @@ def _run_sticker_editor(current_image):
             name = editor.active_sticker[0]
             cv.putText(
                 preview,
-                f"Sticker: {name} | Clique para inserir | U desfaz | Q conclui",
+                f"Sticker: {name} | Clique para inserir | U desfaz | C Limpa | Q conclui",
                 (10, 28), cv.FONT_HERSHEY_SIMPLEX, 0.55, (0, 255, 255), 2, cv.LINE_AA,
             )
             cv.imshow(window_name, preview)
